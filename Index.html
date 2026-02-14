@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Be My Valentine? 💕</title>
+    <!-- EmailJS SDK -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&family=Great+Vibes&family=Parisienne&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            height: 100vh;
+            overflow: hidden;
+            background: linear-gradient(-45deg, #ff6b6b, #feca57, #ff9ff3, #54a0ff);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+            font-family: 'Dancing Script', cursive;
+            position: relative;
+        }
+        
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        /* Floating hearts */
+        .heart {
+            position: absolute;
+            color: rgba(255,255,255,0.8);
+            font-size: 20px;
+            animation: float 6s infinite linear;
+        }
+        
+        @keyframes float {
+            0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-100px) rotate(360deg); opacity: 0; }
+        }
+        
+        /* Proposal page */
+        .proposal-container {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            z-index: 10;
+        }
+        
+        .title {
+            font-family: 'Great Vibes', cursive;
+            font-size: clamp(3rem, 8vw, 6rem);
+            color: white;
+            text-shadow: 0 0 20px rgba(255,255,255,0.8);
+            animation: glow 2s ease-in-out infinite alternate;
+            position: absolute;
+            top: 15%;
+            left: 10%;
+            transform: rotate(-5deg);
+        }
+        
+        @keyframes glow {
+            from { 
+                text-shadow: 0 0 20px rgba(255,255,255,0.8), 0 0 30px rgba(255,107,107,0.6); 
+            }
+            to { 
+                text-shadow: 0 0 30px rgba(255,255,255,1), 0 0 40px rgba(254,202,87,0.8); 
+            }
+        }
+        
+        .question {
+            font-family: 'Parisienne', cursive;
+            font-size: clamp(2.5rem, 7vw, 4.5rem);
+            color: white;
+            text-align: center;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            line-height: 1.2;
+            position: absolute;
+            top: 45%;
+            right: 5%;
+            transform: rotate(3deg);
+            max-width: 90%;
+        }
+        
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            position: absolute;
+            bottom: 20%;
+            left: 50%;
+            transform: translateX(-50%) translateY(20px);
+        }
+        
+        .option-btn {
+            font-family: 'Dancing Script', cursive;
+            font-size: clamp(1.8rem, 5vw, 2.8rem);
+            font-weight: 700;
+            padding: 1rem 2.5rem;
+            border: none;
+            border-radius: 50px;
+            background: linear-gradient(45deg, rgba(255,255,255,0.9), rgba(255,255,255,0.7));
+            color: #e91e63;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            text-decoration: none;
+            display: block;
+            text-align: center;
+        }
+        
+        .option-btn:nth-child(1) { 
+            transform: translateX(-30px) rotate(-2deg); 
+        }
+        .option-btn:nth-child(2) { 
+            transform: translateX(20px) rotate(4deg); 
+            margin-top: 1rem; 
+        }
+        
+        .option-btn:hover {
+            transform: perspective(500px) rotateX(10deg) translateY(-5px) scale(1.05);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            background: linear-gradient(45deg, rgba(255,255,255,1), rgba(255,255,255,0.9));
+        }
+        
+        /* Thank you page */
+        .thankyou-page {
+            display: none;
+            height: 100vh;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            background: linear-gradient(-45deg, #667eea, #764ba2);
+            background-size: 400% 400%;
+            animation: gradientShift 12s ease infinite;
+            position: relative;
+        }
+        
+        .thankyou-text {
+            font-family: 'Great Vibes', cursive;
+            font-size: clamp(4rem, 10vw, 7rem);
+            color: white;
+            text-shadow: 0 0 30px rgba(255,255,255,0.9);
+            animation: pulse 2s infinite;
+            position: absolute;
+            top: 20%;
+            left: 15%;
+            transform: rotate(-8deg);
+            z-index: 20;
+        }
+        
+        .love-text {
+            font-family: 'Parisienne', cursive;
+            font-size: clamp(3rem, 8vw, 5rem);
+            color: #ff6b9d;
+            text-shadow: 0 0 20px rgba(255,107,157,0.8);
+            animation: bounce 2s infinite;
+            position: absolute;
+            bottom: 25%;
+            right: 10%;
+            transform: rotate(5deg);
+            z-index: 20;
+        }
+        
+        /* Polaroid frames */
+        .photo-frame {
+            position: absolute;
+            width: 220px;
+            height: 280px;
+            background: linear-gradient(145deg, #f0f0f0, #e0e0e0);
+            border-radius: 12px;
+            box-shadow: 10px 10px 25px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.8);
+            transform-origin: bottom left;
+            z-index: 15;
+            overflow: hidden;
+        }
+        
+        .photo-frame::before {
+            content: '';
+            position: absolute;
+            top: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 40px;
+            height: 40px;
+            background: radial-gradient(circle at 30% 30%, #333 20%, transparent 50%);
+            border-radius: 50%;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.5), 0 2px 5px rgba(0,0,0,0.3);
+        }
+        
+        .photo-frame::after {
+            content: '';
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            width: 6px;
+            height: 6px;
+            background: #333;
+            border-radius: 50%;
+            box-shadow: inset 0 1px 2px rgba(255,255,255,0.5), 0 1px 2px rgba(0,0,0,0.5);
+        }
+        
+        .photo-frame img {
+            width: 100%;
+            height: 75%;
+            object-fit: cover;
+            position: absolute;
+            bottom: 15px;
+            left: 8px;
+            right: 8px;
+            border-radius: 6px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+            transform: rotate(-1deg);
+        }
+        
+        .photo-caption {
+            position: absolute;
+            bottom: 5px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-family: 'Dancing Script', cursive;
+            font-size: 14px;
+            color: #666;
+            font-weight: 600;
+            text-align: center;
+            width: 90%;
+        }
+        
+        .photo1 { 
+            top: 35%; 
+            left: 5%; 
+            transform: rotate(-12deg) translateY(20px); 
+            animation: photoFloat1 4s ease-in-out infinite; 
+        }
+        .photo2 { 
+            top: 60%; 
+            right: 8%; 
+            transform: rotate(8deg) translateX(-15px); 
+            animation: photoFloat2 5s ease-in-out infinite reverse; 
+        }
+        .photo3 { 
+            bottom: 35%; 
+            left: 25%; 
+            transform: rotate(-6deg) scale(0.9); 
+            animation: photoFloat3 3.5s ease-in-out infinite; 
+        }
+        
+        @keyframes photoFloat1 { 
+            0%, 100% { transform: rotate(-12deg) translateY(20px) translateX(0); } 
+            50% { transform: rotate(-12deg) translateY(10px) translateX(5px); } 
+        }
+        @keyframes photoFloat2 { 
+            0%, 100% { transform: rotate(8deg) translateX(-15px) translateY(0); } 
+            50% { transform: rotate(8deg) translateX(-10px) translateY(-8px); } 
+        }
+        @keyframes photoFloat3 { 
+            0%, 100% { transform: rotate(-6deg) scale(0.9) translateY(0); } 
+            50% { transform: rotate(-6deg) scale(0.92) translateY(-5px); } 
+        }
+        
+        /* Email preview & Send button */
+        .email-preview {
+            position: absolute;
+            top: 10%;
+            right: 5%;
+            width: 300px;
+            max-width: 90vw;
+            background: rgba(255,255,255,0.95);
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            text-align: center;
+            backdrop-filter: blur(10px);
+            z-index: 25;
+        }
+        
+        .send-btn {
+            position: absolute;
+            bottom: 15%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(45deg, #ff6b9d, #ff8e8e);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-family: 'Dancing Script', cursive;
+            font-size: 1.8rem;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 10px 30px rgba(255,107,157,0.4);
+            transition: all 0.3s ease;
+            z-index: 25;
+        }
+        
+        .send-btn:hover { 
+            transform: translateX(-50%) translateY(-5px) scale(1.05); 
+            box-shadow: 0 15px 40px rgba(255,107,157,0.6); 
+        }
+        .send-btn.sending { 
+            background: linear-gradient(45deg, #667eea, #764ba2); 
+            cursor: wait; 
+        }
+        
+        .success-message {
+            position: absolute;
+            bottom: 20%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(76, 175, 80, 0.95);
+            color: white;
+            padding: 20px 40px;
+            border-radius: 50px;
+            font-size: 1.5rem;
+            font-family: 'Dancing Script', cursive;
+            display: none;
+            animation: bounce 1s;
+            box-shadow: 0 15px 40px rgba(76,175,80,0.4);
+            z-index: 25;
+        }
+        
+        @keyframes pulse { 
+            0%, 100% { transform: scale(1); } 
+            50% { transform: scale(1.05); } 
+        }
+        @keyframes bounce { 
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); } 
+            40% { transform: translateY(-10px); } 
+            60% { transform: translateY(-5px); } 
+        }
+        
+        @media (max-width: 768px) {
+            .email-preview, .send-btn, .success-message { 
+                position: static; 
+                margin: 20px auto; 
+                transform: none; 
+            }
+            .photo-frame { 
+                width: 160px; 
+                height: 200px; 
+            }
+            .photo1 { top: 40%; left: 2%; transform: rotate(-10deg) scale(0.85); }
+            .photo2 { top: 65%; right: 2%; transform: rotate(6deg) scale(0.85); }
+            .photo3 { bottom: 40%; left: 15%; transform: rotate(-4deg) scale(0.8); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Floating Hearts -->
+    <div class="heart" style="left: 10%; animation-delay: 0s;">💖</div>
+    <div class="heart" style="left: 20%; animation-delay: 1s;">💕</div>
+    <div class="heart" style="left: 30%; animation-delay: 2s;">💗</div>
+    <div class="heart" style="left: 60%; animation-delay: 0.5s;">💝</div>
+    <div class="heart" style="left: 80%; animation-delay: 1.5s;">💖</div>
+    <div class="heart" style="left: 90%; animation-delay: 3s;">💕</div>
+
+    <!-- Proposal Page -->
+    <div class="proposal-container" id="proposalPage">
+        <div class="title">Meri bhainsudiiii gomlaaaa jiiiiii</div>
+        <div class="question">Would you be<br>my Valentine?</div>
+        <div class="options">
+            <a href="#" class="option-btn" onclick="showThankYou('yes')">haamjiiiii 💕</a>
+            <a href="#" class="option-btn" onclick="showThankYou('wife')">I'm your wife 💍</a>
+        </div>
+    </div>
+
+    <!-- Thank You Page -->
+    <div class="proposal-container thankyou-page" id="thankYouPage">
+        <div class="thankyou-text">Thammm chuuuuu!</div>
+        <div class="love-text">I Love You bhotttt saraaaa ghumloooo jiiiii 💕</div>
+        
+        <!-- Polaroid Photos (Replace with your images in src/ folder) -->
+        <div class="photo-frame photo1">
+            <img src="src/bikaner.jpg" alt="Our moment" onerror="this.src='https://photos.app.goo.gl/GG9J2my72faEV63YA?w=300&h=250&fit=crop'">
+            <div class="photo-caption">Our special moment</div>
+        </div>
+        <div class="photo-frame photo2">
+            <img src="src/travelling.jpg" alt="You & Me" onerror="this.src='https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=250&fit=crop'">
+            <div class="photo-caption">You & Me forever</div>
+        </div>
+        <div class="photo-frame photo3">
+            <img src="src/inClass.jpg" alt="Love" onerror="this.src='https://images.unsplash.com/photo-1519345182560-3f2917c472ef?w=300&h=250&fit=crop'">
+            <div class="photo-caption">Always together</div>
+        </div>
+        
+        <!-- Valentine's Card Preview -->
+        <div class="email-preview" id="emailPreview">
+            <div id="cardTitle" style="font-family: 'Great Vibes', cursive; font-size: 2rem; color: #e91e63; margin-bottom: 10px;"></div>
+            <img id="cardImage" src="" alt="Valentine Card" style="width: 100%; height: 180px; object-fit: cover; border-radius: 15px; margin-bottom: 15px; box-shadow: 0 8px 20px rgba(0,0,0,0.2);">
+            <div style="font-family: 'Parisienne', cursive; font-size: 1.3rem; color: #667eea;">Happy Valentine's Day! 💕</div>
+            <div id="cardMessage" style="font-size: 1rem; color: #666; margin-top: 10px;"></div>
+        </div>
+        
+        <button class="send-btn" id="sendBtn" onclick="sendValentineCard()">
+            ✨ Send Valentine's Card! ✨
+        </button>
+        <div class="success-message" id="successMsg">
+            🎉 Card Sent Successfully! 💕 She'll love it!
+        </div>
+    </div>
+
+    <script>
+        const SERVICE_ID = 'service_257m1bj';
+        const TEMPLATE_ID = 'valentine_card';
+        const PUBLIC_KEY = 'tsa2EMbvAZoYqdETU';
+        
+        const EMAILJS_CONFIG = {
+            serviceID: SERVICE_ID,
+            templateID: TEMPLATE_ID,  
+            publicKey: PUBLIC_KEY
+        };
+        
+        // ✅ EMAILS HARDCODED
+        const RECEIVER_EMAIL = "joshishivangi22@gmail.com";
+        const SENDER_EMAIL = "Deepanand13051999@gmail.com";
+        const YOUR_NAME = "Deep anand";
+        
+        // Initialize EmailJS
+        emailjs.init(EMAILJS_CONFIG.publicKey);
+        
+        let currentResponse = '';
+        
+        function showThankYou(response) {
+            currentResponse = response;
+            document.getElementById('proposalPage').style.display = 'none';
+            document.getElementById('thankYouPage').style.display = 'flex';
+            updateCard(response);
+            
+            // Restart hearts
+            document.querySelectorAll('.heart').forEach((heart, index) => {
+                heart.style.animation = 'none';
+                heart.offsetHeight;
+                heart.style.animation = 'float 6s infinite linear';
+                heart.style.animationDelay = (index * 0.5) + 's';
+            });
+        }
+        
+        function updateCard(response) {
+            const titleEl = document.getElementById('cardTitle');
+            const imageEl = document.getElementById('cardImage');
+            const messageEl = document.getElementById('cardMessage');
+            
+            if (response === 'yes') {
+                titleEl.textContent = "Happy Valentine's Day";
+                titleEl.style.color = '#ff6b9d';
+                imageEl.src = "src/valentine-love.jpg";
+                messageEl.innerHTML = "My Love 💕<br><small>Forever yours on this special day</small>";
+            } else { // wife
+                titleEl.textContent = "Happy Valentine's Day";
+                titleEl.style.color = '#feca57';
+                imageEl.src = "src/wifey-special.jpg";
+                messageEl.innerHTML = "My Wifey 💍✨<br><small>You're my forever Valentine</small>";
+            }
+        }
+        
+        async function sendValentineCard() {
+            const sendBtn = document.getElementById('sendBtn');
+            const successMsg = document.getElementById('successMsg');
+            
+            // Check if EmailJS is configured
+            if (EMAILJS_CONFIG.serviceID === SERVICE_ID) {
+                alert('💕 Please setup EmailJS first!\n1. Go to emailjs.com\n2. Connect your Gmail\n3. Replace 3 values in code\nSee instructions above! ✨');
+                return;
+            }
+            
+            // Loading state
+            sendBtn.innerHTML = '💕 Sending Love... ✨';
+            sendBtn.classList.add('sending');
+            sendBtn.disabled = true;
+            
+            try {
+                const templateParams = {
+                    to_email: RECEIVER_EMAIL,
+                    to_name: "Shivangi",
+                    from_name: YOUR_NAME,
+                    from_email: SENDER_EMAIL,
+                    message: currentResponse === 'wife' ? 
+                        `🌹 Happy Valentine's Day my Wifey! 💍✨
+
+You said "I'm your wife" - my heart completely melted! 🥰
+This is the best Valentine's Day ever!
+
+Forever yours,
+Deepanand 💖
+
+---
+Sent with endless love on Valentine's Day 2026 🌹` :
+                        `🌹 Happy Valentine's Day my Love! my ghumloooooo bchchiiiiiiiiiii ji💕
+
+You said "Yes" - this is the happiest moment of my life! ❤️
+Can't wait to spend forever with you!
+
+Forever yours,
+Mr. Bodmosh Don 💖
+
+---
+Sent with all my love on Valentine's Day 2026 🌹`
+                };
+                
+                const result = await emailjs.send(
+                    EMAILJS_CONFIG.serviceID,
+                    EMAILJS_CONFIG.templateID,
+                    templateParams
+                );
+                
+                console.log('✅ Email sent successfully!', result);
+                
+                // SUCCESS 🎉
+                sendBtn.style.display = 'none';
+                successMsg.style.display = 'block';
+                
+                setTimeout(() => {
+                    successMsg.style.display = 'none';
+                    sendBtn.style.display = 'block';
+                    sendBtn.innerHTML = '✨ Sent! Send Again? ✨';
+                    sendBtn.classList.remove('sending');
+                    sendBtn.disabled = false;
+                }, 5000);
+                
+            } catch (error) {
+                console.error('❌ EmailJS Error:', error);
+                alert('💕 Please check EmailJS setup ('+SERVICE_ID+', '+TEMPLATE_ID+', '+PUBLIC_KEY+') or try again!\n\nError: ' + error.text);
+                sendBtn.innerHTML = '✨ Send Valentine\'s Card! ✨';
+                sendBtn.classList.remove('sending');
+                sendBtn.disabled = false;
+            }
+        }
+        
+        // Prevent button double-click
+        document.querySelectorAll('.option-btn').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+            });
+        });
+    </script>
+</body>
+</html>
